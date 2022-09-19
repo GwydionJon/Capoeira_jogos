@@ -11,3 +11,4 @@ dependencies:
   - pip
   - pip:
     - pre-commit
+    - dash-bootstrap-components
