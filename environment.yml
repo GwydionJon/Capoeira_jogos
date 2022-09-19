@@ -1,0 +1,13 @@
+name: jogos
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - dash
+  - pandas
+  - matplotlib
+  - sphinx
+  - numpy
+  - pip
+  - pip:
+    - pre-commit
