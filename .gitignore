@@ -136,3 +136,5 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+Teilnehmer Jogos.xlsx
+.vscode/launch.json
