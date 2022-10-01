@@ -1,4 +1,5 @@
 from jogos_app import jogosApp
+import paths
 
 
 def main():
