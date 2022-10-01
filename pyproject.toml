@@ -1,0 +1,31 @@
+[build-system]
+requires = [
+    "setuptools>=61",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "capoeira_jogos"
+version = "0.0.1"
+description = "Program to manage a capoeira tournament"
+readme = "README.md"
+maintainers = [
+    { name = "Gwydion Daskalakis", email = "gwdion@daskalakis.de" },
+]
+requires-python = ">=3.10"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "pandas",
+    "numpy",
+    "dash",
+    "dash-bootstrap-components",
+    "openpyxl",
+]
+
+[tool.setuptools]
+packages = ["capoeira_jogos"]

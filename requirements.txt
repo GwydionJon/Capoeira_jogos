@@ -3,3 +3,5 @@ sphinx
 dash
 pandas
 matplotlib
+dash-bootstrap-components
+openpyxl
