@@ -25,6 +25,7 @@ dependencies = [
     "dash",
     "dash-bootstrap-components",
     "openpyxl",
+    "dash-renderer",
 ]
 
 [tool.setuptools]

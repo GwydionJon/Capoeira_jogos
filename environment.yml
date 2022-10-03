@@ -9,6 +9,7 @@ dependencies:
   - sphinx
   - numpy
   - pip
+  - dash-renderer
   - pip:
     - pre-commit
     - dash-bootstrap-components

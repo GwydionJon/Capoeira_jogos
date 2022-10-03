@@ -4,6 +4,7 @@ import paths
 
 def main():
     app = jogosApp()
+
     app.run_server()
 
 

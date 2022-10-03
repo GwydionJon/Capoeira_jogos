@@ -5,3 +5,4 @@ pandas
 matplotlib
 dash-bootstrap-components
 openpyxl
+dash-renderer
