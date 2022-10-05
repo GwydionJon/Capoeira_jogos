@@ -106,7 +106,7 @@ class jogosApp:
 
                 return self._create_group_overview(df_dict), upload_label
             else:
-                print("is none")
+                return html.Div(""), upload_label
 
         @self.app.callback(
             Output(
@@ -134,7 +134,10 @@ class jogosApp:
                         data_input[i][key] = str(
                             np.sum(list(map(int, data_input[i][key].split("+"))))
                         )
-
+                    try:
+                        int(data_input[i][key])
+                    except:
+                        data_input[i][key] = 0
             return data_input
 
         # assign label per round
