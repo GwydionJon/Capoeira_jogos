@@ -20,7 +20,6 @@ def _make_round_header(names, points=None):
     label_string = ""
     for name, point in zip(names, points):
         label_string += f"  {name}: {point},    "
-
     return label_string
 
 
@@ -38,19 +37,23 @@ def calculate_round_points(round_data, group_data):
     ].astype(float)
 
     df["Points Game"] = df["Points Game"] * scale_game_points
-    df_group = pd.DataFrame(group_data)
+    df_round_result = pd.DataFrame(group_data)
+    names_list = list(
+        set([item for sublist in df[["Name 1", "Name 2"]].values for item in sublist])
+    )
+    df_round_result = df_round_result[df_round_result["Apelido"].isin(names_list)]
+    for player in names_list:
 
-    for player in df_group["Apelido"].values:
         points_total_A = df.loc[df["Name 1"] == player][
             ["Points Game", "Points A"]
         ].to_numpy()
         points_total_B = df.loc[df["Name 2"] == player][
             ["Points Game", "Points B"]
         ].to_numpy()
-        df_group.loc[df_group["Apelido"] == player, "Points"] = np.sum(
+        df_round_result.loc[df_round_result["Apelido"] == player, "Points"] = np.sum(
             points_total_A
         ) + np.sum(points_total_B)
-    return df_group
+    return df_round_result
 
 
 class jogosApp:
@@ -151,17 +154,12 @@ class jogosApp:
             ],
         )
         def update_label(data_input, group_data, round_label):
-
             if data_input:
-                df = calculate_round_points(data_input, group_data).sort_values(
+                df_round = calculate_round_points(data_input, group_data).sort_values(
                     "Points", ascending=False
                 )
-                number_player_in_round = len(round_label.split(":"))
-                df_player_in_round = df.nlargest(number_player_in_round, "Points")
 
-                return _make_round_header(
-                    df_player_in_round["Apelido"], df_player_in_round["Points"]
-                )
+                return _make_round_header(df_round["Apelido"], df_round["Points"])
             else:
                 return round_label
 
