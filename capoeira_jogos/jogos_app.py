@@ -66,6 +66,7 @@ class jogosApp:
             external_stylesheets=external_stylesheets,
             suppress_callback_exceptions=False,
         )
+        self.app.title = "capoeira jogos"
         self._create_first_page()
         self._create_callbacks()
         # self._create_jogos_tabs()

@@ -2,6 +2,7 @@ from capoeira_jogos.jogos_app import jogosApp
 
 
 app = jogosApp().app
+app.title = "capoeira jogos"
 
 server = app.server
 
