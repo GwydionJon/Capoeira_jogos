@@ -1,4 +1,4 @@
 cd capoeira_jogos
-pyinstaller -F jogos_manager.py
+pyinstaller jogos_manager.spec
 
 cd ..

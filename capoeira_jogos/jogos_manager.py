@@ -1,5 +1,4 @@
 from waitress import serve
-import time
 import webbrowser  # For launching web pages
 from threading import Timer  # For waiting before launching web page
 
