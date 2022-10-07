@@ -26,10 +26,10 @@ def _make_round_header(names, points=None):
 # Create the app class
 def calculate_round_points(round_data, group_data):
     scale_game_points = 0.9
-    shavi_df_list = []
-    for shavi in round_data:
-        shavi_df_list.append(pd.DataFrame(shavi))
-    df = pd.concat(shavi_df_list)
+    chave_df_list = []
+    for chave in round_data:
+        chave_df_list.append(pd.DataFrame(chave))
+    df = pd.concat(chave_df_list)
 
     # convert all numbers to float
     df[["Points Game", "Points B", "Points A"]] = df[
@@ -71,7 +71,7 @@ class jogosApp:
         # self._create_jogos_tabs()
 
         self.scale_game_points = 0.9
-        self.shavi_size = 4
+        self.chave_size = 4
 
     def _create_callbacks(self):
         @self.app.callback(
@@ -110,13 +110,13 @@ class jogosApp:
 
         @self.app.callback(
             Output(
-                {"type": "shavi_table", "cat": MATCH, "index": MATCH, "round": MATCH},
+                {"type": "chave_table", "cat": MATCH, "index": MATCH, "round": MATCH},
                 "data",
             ),
             [
                 Input(
                     {
-                        "type": "shavi_table",
+                        "type": "chave_table",
                         "cat": MATCH,
                         "index": MATCH,
                         "round": MATCH,
@@ -126,7 +126,7 @@ class jogosApp:
             ],
             [State({"type": "cat_names_point_list", "cat": MATCH}, "data")],
         )
-        def format_shavi_points(data_input, group_data):
+        def format_chave_points(data_input, group_data):
             # add values seperated by +-sign together
             for i, column in enumerate(data_input):
                 for key in ["Points A", "Points B", "Points Game"]:
@@ -145,7 +145,7 @@ class jogosApp:
             Output({"type": "round_label", "cat": MATCH, "round": MATCH}, "children"),
             [
                 Input(
-                    {"type": "shavi_table", "cat": MATCH, "index": ALL, "round": MATCH},
+                    {"type": "chave_table", "cat": MATCH, "index": ALL, "round": MATCH},
                     "data",
                 )
             ],
@@ -170,11 +170,11 @@ class jogosApp:
             Output({"type": "cat_names_point_list", "cat": MATCH}, "data"),
             [
                 Input(
-                    {"type": "shavi_table", "cat": MATCH, "index": ALL, "round": ALL},
+                    {"type": "chave_table", "cat": MATCH, "index": ALL, "round": ALL},
                     "data",
                 ),
                 Input(
-                    {"type": "shavi_table", "cat": MATCH, "index": ALL, "round": ALL},
+                    {"type": "chave_table", "cat": MATCH, "index": ALL, "round": ALL},
                     "id",
                 ),
             ],
@@ -184,13 +184,13 @@ class jogosApp:
         )
         def calculate_group_points(data_input, id_input, group_data):
             if data_input:
-                # sort the shavis according to their rounds
-                shavi_round_dict = defaultdict(list)
-                for shavi_data, shavi_id in zip(data_input, id_input):
-                    round = shavi_id["round"]
-                    shavi_round_dict[round].append(shavi_data)
+                # sort the chaves according to their rounds
+                chave_round_dict = defaultdict(list)
+                for chave_data, chave_id in zip(data_input, id_input):
+                    round = chave_id["round"]
+                    chave_round_dict[round].append(chave_data)
 
-                for i, (round, round_data) in enumerate(shavi_round_dict.items()):
+                for i, (round, round_data) in enumerate(chave_round_dict.items()):
                     # for the first round create a new dataframe
                     if i == 0:
                         df_group = calculate_round_points(round_data, group_data)
@@ -231,7 +231,7 @@ class jogosApp:
                 return False, ""
 
         @self.app.callback(
-            [Output({"type": "shavi_tabs", "cat": MATCH}, "children")],
+            [Output({"type": "chave_tabs", "cat": MATCH}, "children")],
             [
                 Input(
                     {"type": "new_round_confirm_button", "cat": MATCH},
@@ -239,8 +239,8 @@ class jogosApp:
                 )
             ],
             [
-                State({"type": "shavi_tabs", "cat": MATCH}, "children"),
-                State({"type": "shavi_tabs", "cat": MATCH}, "id"),
+                State({"type": "chave_tabs", "cat": MATCH}, "children"),
+                State({"type": "chave_tabs", "cat": MATCH}, "id"),
                 State({"type": "new_round_dropdown", "cat": MATCH}, "value"),
                 State({"type": "cat_names_point_list", "cat": MATCH}, "data"),
             ],
@@ -258,7 +258,7 @@ class jogosApp:
 
                 cat_key = tabs_id["cat"]
                 tabs.append(
-                    self._create_shavi_tab(
+                    self._create_chave_tab(
                         df_round_winner, cat_key=cat_key, round=confirm_click + 1
                     )
                 )
@@ -303,11 +303,11 @@ class jogosApp:
                     )
                 ],
             )
-            tab.children.append(html.H5("Shavis:"))
+            tab.children.append(html.H5("Chaves:"))
             tab.children.append(
                 dcc.Tabs(
-                    id={"type": "shavi_tabs", "cat": key},
-                    children=[self._create_shavi_tab(df, cat_key=key)],
+                    id={"type": "chave_tabs", "cat": key},
+                    children=[self._create_chave_tab(df, cat_key=key)],
                 )
             )
 
@@ -344,29 +344,37 @@ class jogosApp:
             tabs = dcc.Tabs(list_group_tabs)
         return tabs
 
-    def _create_shavi_table(self, names, round, cat_key, index):
+    def _create_chave_table(self, names, round, cat_key, index):
 
         A, B, C, D = names
-        shavi_dict = {
-            "Name 1": [A, C, A, B, A, B],
-            "Points A": [0, 0, 0, 0, 0, 0],
-            "Points Game": [0, 0, 0, 0, 0, 0],
-            "Points B": [0, 0, 0, 0, 0, 0],
-            "Name 2": [B, D, C, D, D, C],
+        chave_dict = {
+            "Name 1": [A, C, A, B, A, B, A, C],
+            "Points A": [0, 0, 0, 0, 0, 0, 0, 0],
+            "Points Game": [0, 0, 0, 0, 0, 0, 0, 0],
+            "Points B": [0, 0, 0, 0, 0, 0, 0, 0],
+            "Name 2": [B, D, C, D, D, C, B, D],
         }
 
-        shavi_df = pd.DataFrame(shavi_dict)
+        chave_df = pd.DataFrame(chave_dict)
 
-        shavi_table = dash_table.DataTable(
-            data=shavi_df.to_dict("records"),
-            columns=[{"name": i, "id": i} for i in shavi_df.columns],
+        chave_table = dash_table.DataTable(
+            data=chave_df.to_dict("records"),
+            columns=[{"name": i, "id": i} for i in chave_df.columns],
             id={
-                "type": "shavi_table",
+                "type": "chave_table",
                 "cat": cat_key,
                 "index": str(index),
                 "round": str(round),
             },
-            style_cell_conditional=[
+            style_data_conditional=[
+                {"if": {"row_index": 0}, "backgroundColor": "#EB7D7D"},
+                {"if": {"row_index": 1}, "backgroundColor": "#EB7D7D"},
+                {"if": {"row_index": 2}, "backgroundColor": "#C3E84C"},
+                {"if": {"row_index": 3}, "backgroundColor": "#C3E84C"},
+                {"if": {"row_index": 4}, "backgroundColor": "#5CE84C"},
+                {"if": {"row_index": 5}, "backgroundColor": "#5CE84C"},
+                {"if": {"row_index": 6}, "backgroundColor": "#7D32BF"},
+                {"if": {"row_index": 7}, "backgroundColor": "#7D32BF"},
                 {
                     "if": {"column_id": "Name 1"},
                     "max-width": "25px",
@@ -387,49 +395,72 @@ class jogosApp:
             ],
             # id="test"
         )
-        for column in shavi_table.columns:
+        for column in chave_table.columns:
             if column["name"] in ["Points A", "Points Game", "Points B"]:
                 # column["type"] = "numeric"
                 column["editable"] = True
 
-        return shavi_table
+        return chave_table
 
-    def _create_shavi_tab(self, df, cat_key, round=1) -> dcc.Tabs:
+    def _create_chave_tab(self, df, cat_key, round=1) -> dcc.Tabs:
         name_list = list(df["Apelido"])
         name_label = html.H6(
             _make_round_header(name_list),
             id={"type": "round_label", "cat": cat_key, "round": str(round)},
         )
-        # Add Platzhalter for filled shavis
-        if len(name_list) % self.shavi_size != 0:
-            for i in range(self.shavi_size - len(name_list) % self.shavi_size):
+        # Add Platzhalter for filled chaves
+        random.shuffle(name_list, lambda: 0.2)
+
+        if len(name_list) % self.chave_size != 0:
+            for i in range(self.chave_size - len(name_list) % self.chave_size):
                 name_list.append("Platzhalter")
 
-        random.shuffle(name_list)
-        n_shavis = np.ceil(len(df) / self.shavi_size)
-        shavi_table_list = []
-        for i in np.arange(n_shavis, dtype=int):
-            current_names = name_list[i * self.shavi_size : (i + 1) * self.shavi_size]
-            current_shavi_table = self._create_shavi_table(
+        n_chaves = np.ceil(len(df) / self.chave_size)
+        chave_table_list = []
+        for i in np.arange(n_chaves, dtype=int):
+            current_names = name_list[i * self.chave_size : (i + 1) * self.chave_size]
+            current_chave_table = self._create_chave_table(
                 current_names, cat_key=cat_key, index=i, round=round
             )
-            shavi_table_list.append(current_shavi_table)
+            chave_table_list.append(
+                html.Div([html.Div(f"Chave {i+1}:"), current_chave_table])
+            )
 
-        shavi_tab = dcc.Tab(
+        # explain coloring:
+        coloring_label = html.Div(
+            [
+                "The different colors in each chave represent possible different game types. \n"
+                + "For example red are the Sao bento games, yellow Benguela, green and purple Iúna or Angola respectivly. \n"
+                + "This should when for example first all rounds of Sao bento are played in all shaves before starting with Benguela. \n"
+                + "If the given game type is not present in a category just leave the fields empty or just use them for another game type. "
+            ]
+        )
+
+        # create the entire tab
+        chave_tab = dcc.Tab(
             label=f"Round {round}",
-            id={"type": "shavi_tab", "cat": cat_key, "round": str(round)},
+            id={"type": "chave_tab", "cat": cat_key, "round": str(round)},
             children=[
-                html.Div([name_label, *shavi_table_list], style={"width": "50%"})
+                html.Div(
+                    [name_label, coloring_label, *chave_table_list],
+                    style={"width": "50%"},
+                )
             ],
         )
 
-        return shavi_tab
+        return chave_tab
 
     def _create_first_page(self):
 
         self.app.layout = html.Div(
             [
                 html.H5("Jogos Setup:"),
+                html.Div(
+                    "Please click on 'Select Files' and select your premade excel file."
+                ),
+                html.Div(
+                    "This file should at least include a list of all apelidos and 'Apelido' as a column title. If you have multiple categories please put them in individual excel pages in the same document."
+                ),
                 dcc.Upload(
                     id="upload-data",
                     children=html.Div(["Drag and Drop or ", html.A("Select Files")]),

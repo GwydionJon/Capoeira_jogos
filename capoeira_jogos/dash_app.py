@@ -1,4 +1,4 @@
-from jogos_app import jogosApp
+from capoeira_jogos.jogos_app import jogosApp
 
 
 app = jogosApp().app
