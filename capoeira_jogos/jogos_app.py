@@ -14,6 +14,59 @@ from collections import defaultdict
 working_dir = mkdtemp()
 
 
+def save_round(
+    cat_name,
+    chave_round_dict,
+    df_group,
+    storage_dict=defaultdict(lambda: defaultdict(dict)),
+):
+
+    for round_nb, round_data in chave_round_dict.items():
+
+        chave_df_list = [pd.DataFrame(chave) for chave in round_data]
+        storage_dict[cat_name]["round_data"][f"round_{round_nb}"] = pd.concat(
+            chave_df_list
+        )
+    storage_dict[cat_name]["group_data"] = df_group
+
+    try:
+        with pd.ExcelWriter("jogos_results.xlsx", engine="openpyxl") as writer:
+
+            for cat_id, cat_value in storage_dict.items():
+
+                if isinstance(cat_value["group_data"], pd.DataFrame):
+                    cat_value["group_data"].to_excel(
+                        writer, sheet_name=f"{cat_id}_main"
+                    )
+
+                    for round_number, round_value in cat_value["round_data"].items():
+                        round_value.to_excel(
+                            writer, sheet_name=f"{cat_id}_{round_number}"
+                        )
+
+    except PermissionError:
+        with pd.ExcelWriter(
+            "IF_THIS_APPEARS_CLOSE_EXCEL.xlsx", engine="openpyxl"
+        ) as writer:
+
+            for cat_id, cat_value in storage_dict.items():
+
+                if isinstance(cat_value["group_data"], pd.DataFrame):
+                    cat_value["group_data"].to_excel(
+                        writer, sheet_name=f"{cat_id}_main"
+                    )
+
+                    for round_number, round_value in cat_value["round_data"].items():
+                        round_value.to_excel(
+                            writer, sheet_name=f"{cat_id}_{round_number}"
+                        )
+
+    except RuntimeError:
+        # RuntimeError: dictionary changed size during iteration
+        # no idea what to do about this...
+        pass
+
+
 def _make_round_header(names, points=None):
     if points is None:
         points = np.zeros(len(names))
@@ -201,7 +254,7 @@ class jogosApp:
                             df_group["Points"]
                             + calculate_round_points(round_data, group_data)["Points"]
                         )
-
+                save_round(id_input[0]["cat"], chave_round_dict, df_group)
                 return df_group.to_dict("records")
             else:
                 return group_data
@@ -433,7 +486,9 @@ class jogosApp:
                 "The different colors in each chave represent possible different game types. \n"
                 + "For example red are the Sao bento games, yellow Benguela, green and purple Iúna or Angola respectivly. \n"
                 + "This should when for example first all rounds of Sao bento are played in all shaves before starting with Benguela. \n"
-                + "If the given game type is not present in a category just leave the fields empty or just use them for another game type. "
+                + "If the given game type is not present in a category just leave the fields empty or just use them for another game type. \n"
+                + "When run locally this programm will try to save each point change as a comprehensive excel file, please do not have excel open while entering new points! "
+                + "Hint: you can add multiple numbers with the + sign like: `3+4+5` into a field. This will than be calculated automatically."
             ]
         )
 
