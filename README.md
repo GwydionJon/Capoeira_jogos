@@ -6,7 +6,7 @@ An online version can be found here: http://gwydiond.pythonanywhere.com/
 Note that the online version has only a limited amount of cpu power, thus I recommend running the program locally.
 You are free to compile the program yourself, further infos blow.
 
-
+### Introduction:
 This program was designed for my capoeira group `Mare Alta` for use in our tournament.
 Its job is to simplify the point calculation as well as the determination of the next round.
 
