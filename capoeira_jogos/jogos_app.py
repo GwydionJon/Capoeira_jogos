@@ -156,7 +156,7 @@ class jogosApp:
                     ]
 
                     # fill missing apelido with first name
-                    df_dict[key].Apelido.fillna(df_dict[key].Vorname, inplace=True)
+                    df_dict[key].Apelido.fillna(df_dict[key].Name, inplace=True)
 
                 return self._create_group_overview(df_dict), upload_label
             else:
@@ -339,14 +339,7 @@ class jogosApp:
                                 columns=[{"name": i, "id": i} for i in df.columns],
                                 style_cell_conditional=[
                                     {"if": {"column_id": c}, "textAlign": "left"}
-                                    for c in [
-                                        "Apelido",
-                                        "Name",
-                                        "Vorname",
-                                        "Kordel",
-                                        "Land",
-                                        "Stadt",
-                                    ]
+                                    for c in df.columns[1:]
                                 ],
                                 style_cell={"maxWidth": "100px"},
                                 style_as_list_view=False,
@@ -483,12 +476,22 @@ class jogosApp:
         # explain coloring:
         coloring_label = html.Div(
             [
-                "The different colors in each chave represent possible different game types. \n"
-                + "For example red are the Sao bento games, yellow Benguela, green and purple Iúna or Angola respectivly. \n"
-                + "This should when for example first all rounds of Sao bento are played in all shaves before starting with Benguela. \n"
-                + "If the given game type is not present in a category just leave the fields empty or just use them for another game type. \n"
-                + "When run locally this programm will try to save each point change as a comprehensive excel file, please do not have excel open while entering new points! "
-                + "Hint: you can add multiple numbers with the + sign like: `3+4+5` into a field. This will than be calculated automatically."
+                html.Label(
+                    [
+                        "The different colors in each chave represent possible different game types. \n",
+                        "For example red are the ",
+                        html.Span("Sao bento", style={"color": "#EB7D7D"}),
+                        " games, yellow ",
+                        html.Span("Benguela", style={"color": "#C3E84C"}),
+                        ", green and purple ",
+                        html.Span("Iúna", style={"color": "#5CE84C"}),
+                        " or ",
+                        html.Span("Angola", style={"color": "#7D32BF"}),
+                        " respectively. \n",
+                        "When run locally this program will try to save each point change as a comprehensive excel file, please do not have excel open while entering new points! ",
+                    ]
+                ),
+                "Hint: you can add multiple numbers with the + sign like: `3+4+5` into a field. This will than be calculated automatically.",
             ]
         )
 
@@ -510,12 +513,45 @@ class jogosApp:
 
         self.app.layout = html.Div(
             [
-                html.H5("Jogos Setup:"),
+                html.H5("Jogos Manager:"),
                 html.Div(
-                    "Please click on 'Select Files' and select your premade excel file."
+                    # "This file should at least include a list of all apelidos and 'Apelido' as a column title. If you have multiple categories please put them in individual excel pages in the same document."
+                    [
+                        html.Label(
+                            [
+                                "This program was written by Gwydion Daskalakis and is freely shared under the ",
+                                html.A(
+                                    "MIT License",
+                                    href="https://github.com/GwydionJon/Capoeira_jogos/blob/main/LICENSE",
+                                    target="_blank",
+                                ),
+                            ]
+                        ),
+                        html.Label(
+                            [
+                                "A more detailed instruction as well as the underlying source code is found in the  ",
+                                html.A(
+                                    "github repository",
+                                    href="https://github.com/GwydionJon/Capoeira_jogos",
+                                    target="_blank",
+                                ),
+                            ]
+                        ),
+                        html.Label(
+                            [
+                                "To use this program you need to prepare a suitable excel file that lists all your categories and their participants. An ",
+                                html.A(
+                                    "example file",
+                                    href="https://github.com/GwydionJon/Capoeira_jogos/blob/main/examples/example_excel_file.xlsx",
+                                    target="_blank",
+                                ),
+                                " is provided.",
+                            ]
+                        ),
+                    ]
                 ),
                 html.Div(
-                    "This file should at least include a list of all apelidos and 'Apelido' as a column title. If you have multiple categories please put them in individual excel pages in the same document."
+                    "To start please click on 'Select Files' and select your prepared excel file."
                 ),
                 dcc.Upload(
                     id="upload-data",
