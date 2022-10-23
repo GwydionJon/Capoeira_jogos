@@ -64,4 +64,5 @@ Future plans:
 - Handle multiple participants with identical points.
 - Provide a comprehensive result table at the end of a tournament.
 - Provide portuguese language support.
-- Add option to directly load the jogos_result file as a backup.
+- Add option to directly load the `jogos_result` file as a backup.
+- Add proper documentation.
