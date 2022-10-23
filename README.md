@@ -1,6 +1,10 @@
 # Jogos Manager
 A precompiled exe can be found here: https://heibox.uni-heidelberg.de/d/bcc9bd5e5f134dde87a9/
+
+
 An online version can be found here: http://gwydiond.pythonanywhere.com/
+
+
 Note that the online version has only a limited amount of cpu power, thus I recommend running the program locally.
 You are free to compile the program yourself, further infos blow.
 
