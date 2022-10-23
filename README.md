@@ -1,5 +1,8 @@
 # Jogos Manager
 A precompiled exe can be found here: https://heibox.uni-heidelberg.de/d/bcc9bd5e5f134dde87a9/
+An online version can be found here: http://gwydiond.pythonanywhere.com/
+Note that the online version has only a limited amount of cpu power, thus I recommend running the program locally.
+You are free to compile the program yourself, further infos blow.
 
 
 This program was designed for my capoeira group `Mare Alta` for use in our tournament.
@@ -32,7 +35,6 @@ For each shave in a round you can find a table with the different game combinati
 
 In each round you can find a list of the current points for this round, while the total points are presented in the table above.
 
-
 The different colors in each chave represent possible different game types. For example red are the Sao bento games, yellow Benguela, green and purple Iúna or Angola respectively.
 This should when for example first all rounds of Sao bento are played in all shaves before starting with Benguela. If the given game type is not present in a category just leave the fields empty or just use them for another game type.
 
@@ -42,9 +44,22 @@ Hint: you can add multiple numbers with the `+` sign like: `3+4+5` into a field.
 
 Finally after all games have been played you can start a new round by first selecting the number of players to advance at the bottom of the page. When the `start new round` button is pressed you will be asked to confirm the players. Currently the program does not automatically handle a scenario where two players have the same number of points. It will simply pick one of them over the other. This means you have to make sure this is not the case and decide the winner by adding him some small amount of points in one of his games.
 
+#### Saving and backup:
+When run locally the program will create a backup excel file after each. In the case of a crash or power loss simply restart the program, load the same excel file and use the `jogos_result` file to reconstruct the points.
+Note that this is not available when running the hosted version.
+
+#### Compiling to exe:
+If you don`t want to use the provided executable you can simply compile it yourself after checking the source code.
+You will need a working [python installation](https://www.anaconda.com/products/distribution) for this.
+simply clone the repository, pip install `pyinstaller`
+and run the provided `build_exe-sh` script.
+
+
+
 If you encounter any problems please open an issue at https://github.com/GwydionJon/Capoeira_jogos/issues.
 
 Future plans:
 - Handle multiple participants with identical points.
 - Provide a comprehensive result table at the end of a tournament.
 - Provide portuguese language support.
+- Add option to directly load the jogos_result file as a backup.
