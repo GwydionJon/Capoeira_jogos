@@ -3,6 +3,7 @@ from dash.dash_table.Format import Format, Scheme, Sign, Symbol
 import dash_bootstrap_components as dbc
 import pandas as pd
 from collections import defaultdict
+import random
 
 fontsize = 18
 
@@ -114,13 +115,6 @@ def create_category_tab(category, df):
         id={"type": "category-table", "index": category},
     )
 
-    # add category settings to tab
-    start_chave_button = dbc.Button(
-        children=["Initilize Chaves"],
-        id={"type": "start-chave-button", "index": category},
-        style={"font-size": fontsize},
-    )
-
     # create the tab itself
     tab = dcc.Tab(
         id={"type": "category-tab", "index": category},
@@ -134,16 +128,95 @@ def create_category_tab(category, df):
             dbc.Row(
                 data_table,
             ),
-            dbc.Row(id={"type": "chaves-row", "index": category}),
+            dbc.Row(
+                id={"type": "chaves-row", "index": category},
+                children=add_round_0(
+                    table_participants=data_table.data, category=category
+                ),
+            ),
         ],
     )
     return tab
 
 
+def add_round_0(table_participants, category):
+    names_list = [player["Apelido"] for player in table_participants]
+    player_per_shaves = 4
+    # create chaves
+    shaves_dict, pairs_dict = create_round(names_list, player_per_shaves)
+    # create the first tab
+    shave_tabs = create_round_tabs(
+        category=category,
+        round_number=1,
+        players=names_list,
+        shave_pairs=pairs_dict,
+        shave_names_dict=shaves_dict,
+    )
+    return shave_tabs
+
+
+def split_round_in_chaves(name_list, player_per_shaves):
+    random.seed(0.2)  # set fixed seed
+    random.shuffle(name_list)
+    # amount of chaves
+    no_chaves = (len(name_list) // player_per_shaves) + 1
+
+    # fill up with empty players
+    name_list += ["Placeholder"] * (no_chaves * player_per_shaves - len(name_list))
+    # split names in chaves
+    shaves_dict = {}
+    for i in range(no_chaves):
+        shaves_dict[f"Chave {i}"] = name_list[
+            i * player_per_shaves : (i + 1) * player_per_shaves
+        ]
+    return shaves_dict
+
+
+def make_shaves_pairings(shave_names, game_types):
+    """
+    Generate pairrings for one shave and every game type.
+    Return a dict
+    """
+    # [A, C, A, B, A, B, A, C]
+    # [B, D, C, D, D, C, B, D]
+    # create a list of all possible combinations
+    combos = [
+        [shave_names[0], shave_names[1]],
+        [shave_names[2], shave_names[3]],
+        [shave_names[0], shave_names[2]],
+        [shave_names[1], shave_names[3]],
+        [shave_names[0], shave_names[3]],
+        [shave_names[1], shave_names[2]],
+        [shave_names[0], shave_names[1]],
+        [shave_names[2], shave_names[3]],
+    ]
+    games_per_type = 2  # two games for each game type, so every player plays once
+
+    # create a dict with game types as keys and empty lists as values
+    finished_pairs = defaultdict(list)
+
+    for game_type in game_types:
+        for i in range(games_per_type):
+            finished_pairs[game_type].append(combos.pop(0))
+
+    return finished_pairs
+
+
+def create_round(name_list, player_per_shaves):
+    # calc total games in round
+    game_types = ["Sao Bento", "Benguela", "Iuna", "Angola"]
+    games_per_player = 1
+
+    shaves_dict = split_round_in_chaves(name_list, player_per_shaves)
+    pair_dict = {}
+    for key, shave_names in shaves_dict.items():
+        pair_dict[key] = make_shaves_pairings(shave_names, game_types)
+
+    return shaves_dict, pair_dict
+
+
 def create_round_tabs(
     category,
-    game_types,
-    games_per_player_per_type,
     round_number,
     players,
     shave_pairs,
@@ -171,8 +244,6 @@ def create_round_tabs(
                         children=[
                             create_round_tab(
                                 category,
-                                game_types,
-                                games_per_player_per_type,
                                 round_number,
                                 players,
                                 shave_pairs,
@@ -190,8 +261,6 @@ def create_round_tabs(
 
 def create_round_tab(
     category,
-    game_types,
-    games_per_player_per_type,
     round_number,
     players,
     shave_pairs,
@@ -207,6 +276,8 @@ def create_round_tab(
         df_round.to_dict("records"),
         id={"type": "round_table", "round": round_number, "index": category},
     )
+
+    game_types = ["Sao Bento", "Benguela", "Iuna", "Angola"]
 
     # create the tabs
     all_type_acc_item = []
@@ -235,33 +306,89 @@ def create_round_tab(
 
 
 def create_game_type_acc_item(category, shave_names_dict, game_type, pairs):
-    # generate a small card for each shavi that included the names and a table for the points
-    def _create_shavi_card(
-        category, shave_number, shavi_names, game_type, shavi_pairs_for_type
+    # generate a small card for each chave that included the names and a table for the points
+    def _create_chave_card(
+        category, shave_index, chave_names, game_type, chave_pairs_for_type
     ):
-        # create datatable for the shavi
-        print(shavi_pairs_for_type)
+        # create datatable for the chave
 
-        players_1 = [players[0] for players in shavi_pairs_for_type]
-        players_2 = [players[1] for players in shavi_pairs_for_type]
-        shavi_df = pd.DataFrame(players_1, columns=["Player1"])
-        shavi_df["Ref1-P1"] = 0
-        shavi_df["Ref1-GP"] = 0
-        shavi_df["Ref1-P2"] = 0
-        shavi_df["Ref2-P1"] = 0
-        shavi_df["Ref2-PGP"] = 0
-        shavi_df["Ref2-P2"] = 0
-        shavi_df["Ref3-P1"] = 0
-        shavi_df["Ref3-PGP"] = 0
-        shavi_df["Ref3-P2"] = 0
-        shavi_df["Player2"] = players_2
-        print(shavi_df)
+        players_1 = [players[0] for players in chave_pairs_for_type]
+        players_2 = [players[1] for players in chave_pairs_for_type]
+        chave_df = pd.DataFrame(players_1, columns=["Player 1"])
+        chave_df["Ref1-P1"] = 0
+        chave_df["Ref1-GP"] = 0
+        chave_df["Ref1-P2"] = 0
+        chave_df["Ref2-P1"] = 0
+        chave_df["Ref2-PGP"] = 0
+        chave_df["Ref2-P2"] = 0
+        chave_df["Ref3-P1"] = 0
+        chave_df["Ref3-PGP"] = 0
+        chave_df["Ref3-P2"] = 0
+        chave_df["Player 2"] = players_2
+
+        # set table styling:
+
+        outer_table_style = [
+            {
+                "if": {"column_id": "Player 1"},
+                "width": "15%",
+                "textAlign": "left",
+                "backgroundColor": "rgb(23,35,230)",
+                "color": "white",
+                "border": "1px solid black",
+            },
+            {
+                "if": {"column_id": "Player 2"},
+                "width": "15%",
+                "textAlign": "left",
+                "backgroundColor": "rgb(50,50,50)",
+                "color": "white",
+            },
+        ]
+        inner_table_style_P1 = [
+            {
+                "if": {"column_id": c},
+                "max-width": "10%",
+                "backgroundColor": "rgb(51,67,181)",
+                "color": "white",
+            }
+            for c in ["Ref1-P1", "Ref2-P1", "Ref3-P1"]
+        ]
+        inner_table_style_P2 = [
+            {
+                "if": {"column_id": c},
+                "max-width": "10%",
+                "backgroundColor": "rgb(90,90,90)",
+                "color": "white",
+            }
+            for c in ["Ref1-P2", "Ref2-P2", "Ref3-P2"]
+        ]
+
+        style_data_conditional = (
+            outer_table_style + inner_table_style_P1 + inner_table_style_P2
+        )
+        chave_table = dash_table.DataTable(
+            chave_df.to_dict("records"),
+            columns=[{"name": i, "id": i} for i in chave_df.columns],
+            id={
+                "type": "chave-table",
+                "index": category,
+                "chave": shave_index,
+                "game_type": game_type,
+            },
+            style_data_conditional=style_data_conditional,
+        )
+        for column in chave_table.columns:
+            if "-" in column["name"]:
+                # column["type"] = "numeric"
+                column["editable"] = True
+
         card = dbc.Card(
             [
                 dbc.CardBody(
                     [
-                        html.H4(str(shavi_names), style={"textAlign": "center"}),
-                        dash_table.DataTable(shavi_df.to_dict("records")),
+                        html.H4(str(chave_names), style={"textAlign": "center"}),
+                        chave_table,
                     ]
                 )
             ]
@@ -271,7 +398,7 @@ def create_game_type_acc_item(category, shave_names_dict, game_type, pairs):
     cards = []
     for shave in shave_names_dict.keys():
         cards.append(
-            _create_shavi_card(
+            _create_chave_card(
                 category,
                 shave,
                 shave_names_dict[shave],

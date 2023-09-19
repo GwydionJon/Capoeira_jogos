@@ -3,17 +3,11 @@ from dash.dash_table.Format import Format, Scheme, Sign, Symbol
 import dash_bootstrap_components as dbc
 
 from app_layout import create_basic_layout
-from app_logic import (
-    load_jogos_config_table,
-    initialize_chaves_start_round,
-)
+from app_logic import load_jogos_config_table, collect_and_update_points
 
 
 class jogos_app:
     def __init__(self):
-        print()
-        print()
-
         print()
 
         external_stylesheets = [dbc.themes.BOOTSTRAP]
@@ -41,15 +35,21 @@ class jogos_app:
             prevent_initial_call=True,
         )(load_jogos_config_table)
 
-        # callback for initialize chaves and setup first round
         self.app.callback(
-            Output({"type": "chaves-row", "index": MATCH}, "children"),
-            Input({"type": "output-data-upload", "index": MATCH}, "children"),
-            State({"type": "chaves-row", "index": MATCH}, "children"),
+            Output({"type": "category-table", "index": MATCH}, "data"),
+            Output({"type": "round_table", "round": MATCH, "index": MATCH}, "data"),
+            Input(
+                {
+                    "type": "chave-table",
+                    "index": MATCH,
+                    "chave": ALL,
+                    "game_type": ALL,
+                },
+                "data",
+            ),
             State({"type": "category-table", "index": MATCH}, "data"),
-            State({"type": "chaves-row", "index": MATCH}, "id"),
             prevent_initial_call=True,
-        )(initialize_chaves_start_round)
+        )(collect_and_update_points)
 
     def run_server(self):
         self.app.run_server(debug=True, use_reloader=True, port=8084)
