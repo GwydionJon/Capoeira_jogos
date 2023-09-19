@@ -66,14 +66,51 @@ def load_jogos_config_table(content_str, filename_str, upload_label):
 
 
 def collect_and_update_round_points(new_round_values, current_round_table):
-    print(new_round_values)
-    print()
+    # flatten 2d list
+    new_round_values = list(itertools.chain.from_iterable(new_round_values))
+    # convert to df
+    df_all_game_points = pd.DataFrame(new_round_values)
+
+    # extract all player names
+    names = pd.unique(df_all_game_points[["Player 1", "Player 2"]].values.ravel("K"))
     print(current_round_table)
+
+    for name in names:
+        filtered_player_one = df_all_game_points[
+            df_all_game_points["Player 1"] == name
+        ].filter(like="P1")
+        filtered_player_two = df_all_game_points[
+            df_all_game_points["Player 2"] == name
+        ].filter(like="P2")
+        filtered_player_gp = df_all_game_points[
+            (df_all_game_points["Player 2"] == name)
+            | (df_all_game_points["Player 1"] == name)
+        ].filter(like="GP")
+
+        # Step 2: Select columns containing 'gp' for every player
+
+        sum_p1 = filtered_player_one.astype(int).sum().sum()
+        sum_p2 = filtered_player_two.astype(int).sum().sum()
+        sum_gp = filtered_player_gp.astype(int).sum().sum() * 0.9
+
+        print(name, sum_p1, sum_p2, sum_gp)
+
+        # add points to existing round table
+        for row in current_round_table:
+            if row["Player"] == name:
+                row["personal points"] = sum_p1 + sum_p2
+                row["game points"] = sum_gp
+                row["total points"] = sum_p1 + sum_p2 + sum_gp
+
+    print(current_round_table)
+
     return current_round_table
 
 
 def collect_and_update_cat_points(new_round_table, current_cat_table):
-    print(new_round_table)
-    print()
-    print(current_cat_table)
+    # print("update cat")
+    # print(new_round_table)
+    # print()
+    # print(current_cat_table)
+
     return current_cat_table

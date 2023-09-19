@@ -56,12 +56,12 @@ class jogos_app:
             prevent_initial_call=True,
         )(collect_and_update_round_points)
 
-        # self.app.callback(
-        #     Output({"type": "category-table", "index": MATCH}, "data"),
-        #     Input({"type": "round_table", "round": ALL, "index": MATCH}, "data"),
-        #     State({"type": "category-table", "index": MATCH}, "data"),
-        #     prevent_initial_call=True,
-        # )(collect_and_update_cat_points)
+        self.app.callback(
+            Output({"type": "category-table", "index": MATCH}, "data"),
+            Input({"type": "round_table", "round": ALL, "index": MATCH}, "data"),
+            State({"type": "category-table", "index": MATCH}, "data"),
+            prevent_initial_call=True,
+        )(collect_and_update_cat_points)
 
     def run_server(self):
         self.app.run_server(debug=True, use_reloader=True, port=8084)
