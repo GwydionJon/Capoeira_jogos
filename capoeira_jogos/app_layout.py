@@ -284,7 +284,7 @@ def create_round_tab(
     for game_type in game_types:
         all_type_acc_item.append(
             create_game_type_acc_item(
-                category, shave_names_dict, game_type, shave_pairs
+                category, round_number, shave_names_dict, game_type, shave_pairs
             )
         )
 
@@ -305,10 +305,10 @@ def create_round_tab(
     return tab
 
 
-def create_game_type_acc_item(category, shave_names_dict, game_type, pairs):
+def create_game_type_acc_item(category, round, shave_names_dict, game_type, pairs):
     # generate a small card for each chave that included the names and a table for the points
     def _create_chave_card(
-        category, shave_index, chave_names, game_type, chave_pairs_for_type
+        category, round, shave_index, chave_names, game_type, chave_pairs_for_type
     ):
         # create datatable for the chave
 
@@ -372,6 +372,7 @@ def create_game_type_acc_item(category, shave_names_dict, game_type, pairs):
             columns=[{"name": i, "id": i} for i in chave_df.columns],
             id={
                 "type": "chave-table",
+                "round": round,
                 "index": category,
                 "chave": shave_index,
                 "game_type": game_type,
@@ -400,6 +401,7 @@ def create_game_type_acc_item(category, shave_names_dict, game_type, pairs):
         cards.append(
             _create_chave_card(
                 category,
+                round,
                 shave,
                 shave_names_dict[shave],
                 game_type,

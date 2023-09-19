@@ -3,7 +3,11 @@ from dash.dash_table.Format import Format, Scheme, Sign, Symbol
 import dash_bootstrap_components as dbc
 
 from app_layout import create_basic_layout
-from app_logic import load_jogos_config_table, collect_and_update_points
+from app_logic import (
+    load_jogos_config_table,
+    collect_and_update_round_points,
+    collect_and_update_cat_points,
+)
 
 
 class jogos_app:
@@ -36,20 +40,28 @@ class jogos_app:
         )(load_jogos_config_table)
 
         self.app.callback(
-            Output({"type": "category-table", "index": MATCH}, "data"),
+            # Output({"type": "category-table", "index": MATCH}, "data"),
             Output({"type": "round_table", "round": MATCH, "index": MATCH}, "data"),
             Input(
                 {
                     "type": "chave-table",
                     "index": MATCH,
+                    "round": MATCH,
                     "chave": ALL,
                     "game_type": ALL,
                 },
                 "data",
             ),
-            State({"type": "category-table", "index": MATCH}, "data"),
+            State({"type": "round_table", "round": MATCH, "index": MATCH}, "data"),
             prevent_initial_call=True,
-        )(collect_and_update_points)
+        )(collect_and_update_round_points)
+
+        # self.app.callback(
+        #     Output({"type": "category-table", "index": MATCH}, "data"),
+        #     Input({"type": "round_table", "round": ALL, "index": MATCH}, "data"),
+        #     State({"type": "category-table", "index": MATCH}, "data"),
+        #     prevent_initial_call=True,
+        # )(collect_and_update_cat_points)
 
     def run_server(self):
         self.app.run_server(debug=True, use_reloader=True, port=8084)

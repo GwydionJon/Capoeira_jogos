@@ -65,7 +65,15 @@ def load_jogos_config_table(content_str, filename_str, upload_label):
         return jogos_tabs, upload_label
 
 
-def collect_and_update_points(current_, current_cat_table):
-    print(test)
+def collect_and_update_round_points(new_round_values, current_round_table):
+    print(new_round_values)
     print()
-    print(test2)
+    print(current_round_table)
+    return current_round_table
+
+
+def collect_and_update_cat_points(new_round_table, current_cat_table):
+    print(new_round_table)
+    print()
+    print(current_cat_table)
+    return current_cat_table
