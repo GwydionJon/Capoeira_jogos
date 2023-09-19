@@ -61,12 +61,9 @@ def load_jogos_config_table(content_str, filename_str, upload_label):
                 for sheet_name, df_cat in df_dict.items()
             ],
         )
+        print("load test")
 
         return jogos_tabs, upload_label
-
-
-def initialize_chaves_block_settings(n_clicks):
-    return (True,), True
 
 
 def split_round_in_chaves(name_list, player_per_shaves):
@@ -138,32 +135,33 @@ def create_round(name_list, game_types, games_per_player, player_per_shaves):
 
 
 def initialize_chaves_start_round(
-    n_clicks,
+    something,
     chaves_row_children,
     table_participants,
     game_types,
     games_per_player_per_type,
     category,
 ):
-    # only start chaves once
-    if n_clicks > 1:
-        return chaves_row_children
+    print("test test")
 
-    else:
-        names_list = [player["Apelido"] for player in table_participants]
-        player_per_shaves = 4
-        # create chaves
-        shaves_dict, pairs_dict = create_round(
-            names_list, game_types, games_per_player_per_type, player_per_shaves
-        )
-        category = category["index"]
-        # create the first tab
-        shave_tabs = create_round_tabs(
-            category=category,
-            game_types=game_types,
-            games_per_player_per_type=games_per_player_per_type,
-            round_number=1,
-            players=names_list,
-            shave_pairs=pairs_dict,
-            shave_names_dict=shaves_dict,
-        )
+    # only start chaves once
+
+    names_list = [player["Apelido"] for player in table_participants]
+    player_per_shaves = 4
+    # create chaves
+    shaves_dict, pairs_dict = create_round(
+        names_list, game_types, games_per_player_per_type, player_per_shaves
+    )
+    category = category["index"]
+    # create the first tab
+    shave_tabs = create_round_tabs(
+        category=category,
+        game_types=game_types,
+        games_per_player_per_type=games_per_player_per_type,
+        round_number=1,
+        players=names_list,
+        shave_pairs=pairs_dict,
+        shave_names_dict=shaves_dict,
+    )
+    print("test")
+    return shave_tabs

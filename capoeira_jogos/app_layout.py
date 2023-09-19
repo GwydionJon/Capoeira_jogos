@@ -94,16 +94,13 @@ def create_basic_layout():
 def create_category_tab(category, df):
     """
     Noteable ids:
-
-    {"type": "setting-input","setting": "type-games","index": category,},: id for the game types input
-    {"type": "setting-input","setting": "number-games","index": category,}: id for the amount of games per player per type input
+    t
 
 
     {"type": "category-table", "index": category}: id for the category data table
 
     {"type": "chaves-row", "index": category}: here goes the chaves
 
-    # for the settings input change the readonly attribute to True
     """
 
     # add points columns to table
@@ -118,8 +115,6 @@ def create_category_tab(category, df):
     )
 
     # add category settings to tab
-    setting_card = create_changable_shavi_settings(category)
-
     start_chave_button = dbc.Button(
         children=["Initilize Chaves"],
         id={"type": "start-chave-button", "index": category},
@@ -138,16 +133,6 @@ def create_category_tab(category, df):
             ),
             dbc.Row(
                 data_table,
-            ),
-            dbc.Row(
-                [
-                    dbc.Col(setting_card, width=6),
-                    dbc.Col(
-                        start_chave_button,
-                        align="center",
-                        className="d-grid gap-2 col-3 ",
-                    ),
-                ]
             ),
             dbc.Row(id={"type": "chaves-row", "index": category}),
         ],

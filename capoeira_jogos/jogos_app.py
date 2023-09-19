@@ -5,7 +5,6 @@ import dash_bootstrap_components as dbc
 from app_layout import create_basic_layout
 from app_logic import (
     load_jogos_config_table,
-    initialize_chaves_block_settings,
     initialize_chaves_start_round,
 )
 
@@ -42,46 +41,12 @@ class jogos_app:
             prevent_initial_call=True,
         )(load_jogos_config_table)
 
-        # callback for initialize chaves block settings
-        self.app.callback(
-            Output(
-                {
-                    "type": "setting-games",
-                    "index": MATCH,
-                },
-                "readonly",
-            ),
-            Output(
-                {
-                    "type": "setting-dropdown",
-                    "index": MATCH,
-                },
-                "disabled",
-            ),
-            Input({"type": "start-chave-button", "index": MATCH}, "n_clicks"),
-            prevent_initial_call=True,
-        )(initialize_chaves_block_settings)
-
         # callback for initialize chaves and setup first round
         self.app.callback(
             Output({"type": "chaves-row", "index": MATCH}, "children"),
-            Input({"type": "start-chave-button", "index": MATCH}, "n_clicks"),
+            Input({"type": "output-data-upload", "index": MATCH}, "children"),
             State({"type": "chaves-row", "index": MATCH}, "children"),
             State({"type": "category-table", "index": MATCH}, "data"),
-            State(
-                {
-                    "type": "setting-dropdown",
-                    "index": MATCH,
-                },
-                "value",
-            ),
-            State(
-                {
-                    "type": "setting-games",
-                    "index": MATCH,
-                },
-                "value",
-            ),
             State({"type": "chaves-row", "index": MATCH}, "id"),
             prevent_initial_call=True,
         )(initialize_chaves_start_round)
