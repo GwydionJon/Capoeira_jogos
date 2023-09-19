@@ -73,7 +73,6 @@ def collect_and_update_round_points(new_round_values, current_round_table):
 
     # extract all player names
     names = pd.unique(df_all_game_points[["Player 1", "Player 2"]].values.ravel("K"))
-    print(current_round_table)
 
     for name in names:
         filtered_player_one = df_all_game_points[
@@ -93,8 +92,6 @@ def collect_and_update_round_points(new_round_values, current_round_table):
         sum_p2 = filtered_player_two.astype(int).sum().sum()
         sum_gp = filtered_player_gp.astype(int).sum().sum() * 0.9
 
-        print(name, sum_p1, sum_p2, sum_gp)
-
         # add points to existing round table
         for row in current_round_table:
             if row["Player"] == name:
@@ -102,15 +99,24 @@ def collect_and_update_round_points(new_round_values, current_round_table):
                 row["game points"] = sum_gp
                 row["total points"] = sum_p1 + sum_p2 + sum_gp
 
-    print(current_round_table)
-
     return current_round_table
 
 
 def collect_and_update_cat_points(new_round_table, current_cat_table):
-    # print("update cat")
-    # print(new_round_table)
+    print("update cat")
+    print(new_round_table)
     # print()
-    # print(current_cat_table)
+    print(current_cat_table)
+    # flatten incoming list
+    new_round_table = list(itertools.chain.from_iterable(new_round_table))
 
+    player_points = defaultdict(int)
+    for row in new_round_table:
+        player_points[row["Player"]] += row["total points"]
+
+    for i, row in enumerate(current_cat_table):
+        for player, points in player_points.items():
+            if row["Apelido"] == player:
+                current_cat_table[i]["Points"] = points
+    print(current_cat_table)
     return current_cat_table
