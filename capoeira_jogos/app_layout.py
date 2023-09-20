@@ -205,7 +205,6 @@ def make_shaves_pairings(shave_names, game_types):
 def create_round(name_list, player_per_shaves):
     # calc total games in round
     game_types = ["Sao Bento", "Benguela", "Iuna", "Angola"]
-    games_per_player = 1
 
     shaves_dict = split_round_in_chaves(name_list, player_per_shaves)
     pair_dict = {}
@@ -253,7 +252,7 @@ def create_round_tabs(
                         style={"margin": "2%"},
                     ),
                 ]
-            )
+            ),
         ]
     )
     return tabs_layout
@@ -299,6 +298,81 @@ def create_round_tab(
         children=[
             html.Div(overview_table, style={"width": "50%", "margin": "2%"}),
             html.Div(shave_game_type_accordion, style={"width": "80%", "margin": "2%"}),
+            dbc.Row(
+                style={"width": "80%", "margin": "3%"},
+                children=[
+                    dbc.Col(
+                        [
+                            dbc.InputGroup(
+                                [
+                                    dbc.InputGroupText(
+                                        "How many should advance to the next round?"
+                                    ),
+                                    dcc.Dropdown(
+                                        options=[32, 16, 8, 4],
+                                        value=16,
+                                        id={
+                                            "type": "advance-dropdown",
+                                            "round": round_number,
+                                            "index": category,
+                                        },
+                                        style={"margin-top": "0.5%", "width": "100%"},
+                                    ),
+                                ],
+                                style={"margin": ".5%", "width": "100%"},
+                                className="mb-3",
+                            ),
+                        ]
+                    ),
+                    dbc.Col(
+                        [
+                            dbc.InputGroup(
+                                [
+                                    dbc.InputGroupText(
+                                        "In case of a draw please choose:"
+                                    ),
+                                    dbc.RadioItems(
+                                        options=[],
+                                        id={
+                                            "type": "round_tie_breaker",
+                                            "round": round_number,
+                                            "index": category,
+                                        },
+                                    ),
+                                ],
+                                style={
+                                    "margin-top": ".5%",
+                                    "margin-left": "5%",
+                                    "width": "70%",
+                                },
+                                className="mb-3",
+                            ),
+                        ]
+                    ),
+                    dbc.Col(
+                        [
+                            dbc.Button(
+                                f"Finish Round {round_number}",
+                                disabled=True,
+                                id={
+                                    "type": "add-round-button",
+                                    "round": round_number,
+                                    "index": category,
+                                },
+                                style={"margin": ".5%", "width": "40%"},
+                            ),
+                            html.P(
+                                "Check the tiebreaker box before starting a new round",
+                                id={
+                                    "type": "check_tiebreaker_text",
+                                    "round": round_number,
+                                    "index": category,
+                                },
+                            ),
+                        ]
+                    ),
+                ],
+            ),
         ],
         label=f"Round {round_number}",
     )

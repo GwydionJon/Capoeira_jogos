@@ -7,6 +7,9 @@ from app_logic import (
     load_jogos_config_table,
     collect_and_update_round_points,
     collect_and_update_cat_points,
+    check_ties_in_round,
+    enable_next_round_button,
+    start_new_round,
 )
 
 
@@ -42,6 +45,14 @@ class jogos_app:
         self.app.callback(
             # Output({"type": "category-table", "index": MATCH}, "data"),
             Output({"type": "round_table", "round": MATCH, "index": MATCH}, "data"),
+            Output(
+                {
+                    "type": "round_tie_breaker",
+                    "round": MATCH,
+                    "index": MATCH,
+                },
+                "value",
+            ),
             Input(
                 {
                     "type": "chave-table",
@@ -62,6 +73,82 @@ class jogos_app:
             State({"type": "category-table", "index": MATCH}, "data"),
             prevent_initial_call=True,
         )(collect_and_update_cat_points)
+
+        self.app.callback(
+            Output(
+                {
+                    "type": "round_tie_breaker",
+                    "round": MATCH,
+                    "index": MATCH,
+                },
+                "options",
+            ),
+            Input({"type": "round_table", "round": MATCH, "index": MATCH}, "data"),
+            Input(
+                {
+                    "type": "advance-dropdown",
+                    "round": MATCH,
+                    "index": MATCH,
+                },
+                "value",
+            ),
+            prevent_initial_call=True,
+        )(check_ties_in_round)
+
+        self.app.callback(
+            Output(
+                {
+                    "type": "add-round-button",
+                    "round": MATCH,
+                    "index": MATCH,
+                },
+                "disabled",
+            ),
+            Output(
+                {
+                    "type": "check_tiebreaker_text",
+                    "round": MATCH,
+                    "index": MATCH,
+                },
+                "children",
+            ),
+            Input(
+                {"type": "round_tie_breaker", "round": MATCH, "index": MATCH}, "value"
+            ),
+            prevent_initial_call=True,
+        )(enable_next_round_button)
+
+        self.app.callback(
+            Output(
+                {"type": "cat-round-tabs", "index": MATCH},
+                "children",
+            ),
+            Input(
+                {"type": "add-round-button", "round": ALL, "index": MATCH}, "n_clicks"
+            ),
+            State({"type": "round_table", "round": ALL, "index": MATCH}, "data"),
+            State(
+                {
+                    "type": "advance-dropdown",
+                    "round": ALL,
+                    "index": MATCH,
+                },
+                "value",
+            ),
+            State(
+                {
+                    "type": "advance-dropdown",
+                    "round": ALL,
+                    "index": MATCH,
+                },
+                "value",
+            ),
+            State(
+                {"type": "cat-round-tabs", "index": MATCH},
+                "children",
+            ),
+            prevent_initial_call=True,
+        )(start_new_round)
 
     def run_server(self):
         self.app.run_server(debug=True, use_reloader=True, port=8084)
