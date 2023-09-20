@@ -10,6 +10,7 @@ from app_logic import (
     check_ties_in_round,
     enable_next_round_button,
     start_new_round,
+    generate_category_results,
 )
 
 
@@ -115,6 +116,9 @@ class jogos_app:
             Input(
                 {"type": "round_tie_breaker", "round": MATCH, "index": MATCH}, "value"
             ),
+            Input(
+                {"type": "add-round-button", "round": MATCH, "index": MATCH}, "n_clicks"
+            ),
             prevent_initial_call=True,
         )(enable_next_round_button)
 
@@ -137,7 +141,7 @@ class jogos_app:
             ),
             State(
                 {
-                    "type": "advance-dropdown",
+                    "type": "round_tie_breaker",
                     "round": ALL,
                     "index": MATCH,
                 },
@@ -147,8 +151,30 @@ class jogos_app:
                 {"type": "cat-round-tabs", "index": MATCH},
                 "children",
             ),
+            State(
+                {"type": "cat-round-tabs", "index": MATCH},
+                "id",
+            ),
             prevent_initial_call=True,
         )(start_new_round)
+
+        self.app.callback(
+            Output({"type": "offcanvas_results", "index": MATCH}, "is_open"),
+            Output({"type": "offcanvas_results", "index": MATCH}, "children"),
+            Input({"type": "show-results-button", "index": MATCH}, "n_clicks"),
+            State(
+                {
+                    "type": "chave-table",
+                    "index": MATCH,
+                    "round": ALL,
+                    "chave": ALL,
+                    "game_type": ALL,
+                },
+                "data",
+            ),
+            State({"type": "round_table", "round": ALL, "index": MATCH}, "data"),
+            prevent_initial_call=True,
+        )(generate_category_results)
 
     def run_server(self):
         self.app.run_server(debug=True, use_reloader=True, port=8084)

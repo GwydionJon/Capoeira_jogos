@@ -6,7 +6,7 @@ import numpy as np
 from tempfile import mkdtemp
 import base64
 import io
-from app_layout import create_category_tab
+from app_layout import create_category_tab, create_round_tab, create_round
 import random
 import itertools
 from collections import defaultdict
@@ -67,6 +67,7 @@ def load_jogos_config_table(content_str, filename_str, upload_label):
 
 def collect_and_update_round_points(new_round_values, current_round_table):
     # flatten 2d list
+
     new_round_values = list(itertools.chain.from_iterable(new_round_values))
     # convert to df
     df_all_game_points = pd.DataFrame(new_round_values).replace("", 0)
@@ -103,7 +104,6 @@ def collect_and_update_round_points(new_round_values, current_round_table):
 
 
 def collect_and_update_cat_points(new_round_table, current_cat_table):
-
     # flatten incoming list
     new_round_table = list(itertools.chain.from_iterable(new_round_table))
 
@@ -158,8 +158,11 @@ def check_ties_in_round(current_round_table, no_of_winners):
     return ["No tiebreaker needed"]
 
 
-def enable_next_round_button(tie_breaker_check):
-    if tie_breaker_check is None:
+def enable_next_round_button(tie_breaker_check, n_clicks_new_round):
+    if n_clicks_new_round is not None and n_clicks_new_round > 0:
+        return True, "new Round already started"
+
+    elif tie_breaker_check is None:
         return True, "Check the tiebreaker box before starting a new round"
 
     elif "There is more then one tiebreaker needed" in tie_breaker_check:
@@ -170,11 +173,17 @@ def enable_next_round_button(tie_breaker_check):
 
 
 def start_new_round(
-    n_clicks, all_round_tables, no_of_winners, tiebreaker_names, current_round_tabs
+    n_clicks,
+    all_round_tables,
+    no_of_winners,
+    tiebreaker_names,
+    current_round_tabs,
+    current_round_tab_id,
 ):
-
     # I think we only ever need to consider the last entry of these input lists as we are only ever adding one round at a time
     # to make sure nothing wierd happens I should deactivate the all previous buttons and radio menus
+
+    current_cat_id = current_round_tab_id["index"]
 
     # get current round number:
     current_round = len(n_clicks)
@@ -188,9 +197,81 @@ def start_new_round(
 
     # advancing player_names
     player_names = top_players["Player"].to_list()
-
     if all_tied_edge_cases is not None:
         player_names.append(tiebreaker_name)
-    print(player_names)
+
+    player_per_shaves = 4
+    shaves_dict, pairs_dict = create_round(player_names, player_per_shaves)
+
+    # create new round tab
+    new_tab = create_round_tab(
+        category=current_cat_id,
+        round_number=current_round + 1,
+        players=player_names,
+        shave_pairs=pairs_dict,
+        shave_names_dict=shaves_dict,
+    )
+
+    current_round_tabs.append(new_tab)
 
     return current_round_tabs
+
+
+def generate_category_results(n_clicks, all_games_tables, all_rounds_tables):
+    # all games tables strucute: all_games_tables[game_type*round][game]
+
+    best_game_Layout = html.Div(children=[html.H2("Best Games for each category:")])
+
+    # find the winners in category:
+    last_round_df = pd.DataFrame(all_rounds_tables[-1])
+    last_round_df.sort_values(by=["total points"], ascending=False, inplace=True)
+
+    last_round_table = dbc.Table.from_dataframe(
+        last_round_df, striped=True, bordered=True, hover=True
+    )
+    best_game_Layout.children.append(html.H2("Category winners:"))
+    best_game_Layout.children.append(last_round_table)
+
+    # find best games for each game type
+    game_types = ["Sao Bento", "Benguela", "Iuna", "Angola"]
+
+    # concanate all games for one game type over all rounds tables
+
+    game_type_dict = defaultdict(list)
+
+    for i, game_type in enumerate(game_types):
+        for j in range(len(all_rounds_tables)):
+            game_type_dict[game_type].extend(all_games_tables[i + 4 * j])
+
+    for game_type, game_type_games in game_type_dict.items():
+        df_for_game_type = pd.DataFrame(game_type_games)
+        df_for_game_type["GP"] = (
+            df_for_game_type["Ref1-GP"].values.astype(int)
+            + df_for_game_type["Ref2-GP"].values.astype(int)
+            + df_for_game_type["Ref3-GP"].values.astype(int)
+        )
+        df_for_game_type["P1"] = (
+            df_for_game_type["Ref1-P1"].values.astype(int)
+            + df_for_game_type["Ref2-P1"].values.astype(int)
+            + df_for_game_type["Ref3-P1"].values.astype(int)
+        )
+        df_for_game_type["P2"] = (
+            df_for_game_type["Ref1-P2"].values.astype(int)
+            + df_for_game_type["Ref2-P2"].values.astype(int)
+            + df_for_game_type["Ref3-P2"].values.astype(int)
+        )
+
+        best_game_points = df_for_game_type.nlargest(1, "GP")["GP"].values[0]
+        result_columns = ["Player 1", "Player 2", "P1", "P2", "GP"]
+        best_games = df_for_game_type[df_for_game_type["GP"] == best_game_points][
+            result_columns
+        ]
+
+        # make dash table
+        new_table = dbc.Table.from_dataframe(
+            best_games, striped=True, bordered=True, hover=True
+        )
+        best_game_Layout.children.append(html.H2(f"Best {game_type} games:"))
+        best_game_Layout.children.append(new_table)
+
+    return True, best_game_Layout

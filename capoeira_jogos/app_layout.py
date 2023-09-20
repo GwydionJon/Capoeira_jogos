@@ -238,6 +238,17 @@ def create_round_tabs(
                             "This follows for Ref2 and Ref3 respectively.",
                         ]
                     ),
+                    dbc.Button(
+                        "Show results",
+                        id={"type": "show-results-button", "index": category},
+                        style={"margin-left": "2%", "width": "30%"},
+                    ),
+                    dbc.Offcanvas(
+                        children=[],
+                        title=f"{category} results:",
+                        id={"type": "offcanvas_results", "index": category},
+                        is_open=False,
+                    ),
                     dcc.Tabs(
                         id={"type": "cat-round-tabs", "index": category},
                         children=[
@@ -393,10 +404,10 @@ def create_game_type_acc_item(category, round, shave_names_dict, game_type, pair
         chave_df["Ref1-GP"] = 0
         chave_df["Ref1-P2"] = 0
         chave_df["Ref2-P1"] = 0
-        chave_df["Ref2-PGP"] = 0
+        chave_df["Ref2-GP"] = 0
         chave_df["Ref2-P2"] = 0
         chave_df["Ref3-P1"] = 0
-        chave_df["Ref3-PGP"] = 0
+        chave_df["Ref3-GP"] = 0
         chave_df["Ref3-P2"] = 0
         chave_df["Player 2"] = players_2
 
