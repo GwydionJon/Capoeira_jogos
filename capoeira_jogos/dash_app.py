@@ -1,7 +1,7 @@
-from capoeira_jogos.jogos_app import jogosApp
+from capoeira_jogos.jogos_app import Jogos_App
 
 
-app = jogosApp().app
+app = Jogos_App().app
 app.title = "capoeira jogos"
 
 server = app.server

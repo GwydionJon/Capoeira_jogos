@@ -11,10 +11,11 @@ from app_logic import (
     enable_next_round_button,
     start_new_round,
     generate_category_results,
+    save_everything_to_excl,
 )
 
 
-class jogos_app:
+class Jogos_App:
     def __init__(self):
         print()
 
@@ -173,8 +174,44 @@ class jogos_app:
                 "data",
             ),
             State({"type": "round_table", "round": ALL, "index": MATCH}, "data"),
+            State(
+                {
+                    "type": "chave-table",
+                    "index": MATCH,
+                    "round": ALL,
+                    "chave": ALL,
+                    "game_type": ALL,
+                },
+                "id",
+            ),
             prevent_initial_call=True,
         )(generate_category_results)
+
+        self.app.callback(
+            Output("div-hidden", "children"),
+            Input(
+                {
+                    "type": "chave-table",
+                    "index": ALL,
+                    "round": ALL,
+                    "chave": ALL,
+                    "game_type": ALL,
+                },
+                "data",
+            ),
+            State(
+                {
+                    "type": "chave-table",
+                    "index": ALL,
+                    "round": ALL,
+                    "chave": ALL,
+                    "game_type": ALL,
+                },
+                "id",
+            ),
+            State("upload-data", "filename"),
+            prevent_initial_call=True,
+        )(save_everything_to_excl)
 
     def run_server(self):
         self.app.run_server(debug=True, use_reloader=True, port=8084)

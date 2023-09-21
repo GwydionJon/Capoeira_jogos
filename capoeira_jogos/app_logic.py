@@ -201,8 +201,9 @@ def start_new_round(
         player_names.append(tiebreaker_name)
 
     player_per_shaves = 4
+    print(player_names)
     shaves_dict, pairs_dict = create_round(player_names, player_per_shaves)
-
+    print(shaves_dict)
     # create new round tab
     new_tab = create_round_tab(
         category=current_cat_id,
@@ -217,7 +218,22 @@ def start_new_round(
     return current_round_tabs
 
 
-def generate_category_results(n_clicks, all_games_tables, all_rounds_tables):
+def _organize_games_table(all_games_tables, all_game_table_ids):
+    # game_type_dict[cat][game_type][round][chave]
+    game_type_dict = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    )
+    for game_id, actual_game_table in zip(all_game_table_ids, all_games_tables):
+        game_type_dict[game_id["index"]][game_id["game_type"]][game_id["round"]][
+            game_id["chave"]
+        ].append(pd.DataFrame(actual_game_table))
+
+    return game_type_dict
+
+
+def generate_category_results(
+    n_clicks, all_games_tables, all_rounds_tables, all_game_table_ids
+):
     # all games tables strucute: all_games_tables[game_type*round][game]
 
     best_game_Layout = html.Div(children=[html.H2("Best Games for each category:")])
@@ -232,46 +248,93 @@ def generate_category_results(n_clicks, all_games_tables, all_rounds_tables):
     best_game_Layout.children.append(html.H2("Category winners:"))
     best_game_Layout.children.append(last_round_table)
 
-    # find best games for each game type
-    game_types = ["Sao Bento", "Benguela", "Iuna", "Angola"]
+    orgnaized_games_tables = _organize_games_table(all_games_tables, all_game_table_ids)
 
-    # concanate all games for one game type over all rounds tables
+    for category, category_games in orgnaized_games_tables.items():
+        for game_type, game_type_games in category_games.items():
+            # concanate all games for one game type over all rounds tables
 
-    game_type_dict = defaultdict(list)
+            total_game_type_df = pd.DataFrame()
+            for round, round_games in game_type_games.items():
+                for chave, chave_games in round_games.items():
+                    for game in chave_games:
+                        total_game_type_df = pd.concat([total_game_type_df, game])
 
-    for i, game_type in enumerate(game_types):
-        for j in range(len(all_rounds_tables)):
-            game_type_dict[game_type].extend(all_games_tables[i + 4 * j])
+            df_for_game_type = pd.DataFrame()
+            df_for_game_type["GP"] = (
+                total_game_type_df["Ref1-GP"].values.astype(int)
+                + total_game_type_df["Ref2-GP"].values.astype(int)
+                + total_game_type_df["Ref3-GP"].values.astype(int)
+            )
+            df_for_game_type["P1"] = (
+                total_game_type_df["Ref1-P1"].values.astype(int)
+                + total_game_type_df["Ref2-P1"].values.astype(int)
+                + total_game_type_df["Ref3-P1"].values.astype(int)
+            )
+            df_for_game_type["P2"] = (
+                total_game_type_df["Ref1-P2"].values.astype(int)
+                + total_game_type_df["Ref2-P2"].values.astype(int)
+                + total_game_type_df["Ref3-P2"].values.astype(int)
+            )
+            df_for_game_type["Player 1"] = total_game_type_df["Player 1"].values
+            df_for_game_type["Player 2"] = total_game_type_df["Player 2"].values
 
-    for game_type, game_type_games in game_type_dict.items():
-        df_for_game_type = pd.DataFrame(game_type_games)
-        df_for_game_type["GP"] = (
-            df_for_game_type["Ref1-GP"].values.astype(int)
-            + df_for_game_type["Ref2-GP"].values.astype(int)
-            + df_for_game_type["Ref3-GP"].values.astype(int)
-        )
-        df_for_game_type["P1"] = (
-            df_for_game_type["Ref1-P1"].values.astype(int)
-            + df_for_game_type["Ref2-P1"].values.astype(int)
-            + df_for_game_type["Ref3-P1"].values.astype(int)
-        )
-        df_for_game_type["P2"] = (
-            df_for_game_type["Ref1-P2"].values.astype(int)
-            + df_for_game_type["Ref2-P2"].values.astype(int)
-            + df_for_game_type["Ref3-P2"].values.astype(int)
-        )
+            best_game_points = df_for_game_type.nlargest(1, "GP")["GP"].values[0]
+            result_columns = ["Player 1", "Player 2", "P1", "P2", "GP"]
+            best_games = df_for_game_type[df_for_game_type["GP"] == best_game_points][
+                result_columns
+            ]
 
-        best_game_points = df_for_game_type.nlargest(1, "GP")["GP"].values[0]
-        result_columns = ["Player 1", "Player 2", "P1", "P2", "GP"]
-        best_games = df_for_game_type[df_for_game_type["GP"] == best_game_points][
-            result_columns
-        ]
-
-        # make dash table
-        new_table = dbc.Table.from_dataframe(
-            best_games, striped=True, bordered=True, hover=True
-        )
-        best_game_Layout.children.append(html.H2(f"Best {game_type} games:"))
-        best_game_Layout.children.append(new_table)
-
+            # make dash table
+            new_table = dbc.Table.from_dataframe(
+                best_games, striped=True, bordered=True, hover=True
+            )
+            best_game_Layout.children.append(html.H2(f"Best {game_type} games:"))
+            best_game_Layout.children.append(new_table)
     return True, best_game_Layout
+
+
+def save_everything_to_excl(all_games_tables, all_game_table_ids, filename):
+    def _dataframe_row_sep(separator):
+        df = pd.DataFrame()
+        df["Player 1"] = separator
+        df["Ref1-P1"] = separator
+        df["Ref1-GP"] = separator
+        df["Ref1-P2"] = separator
+        df["Ref2-P1"] = separator
+        df["Ref2-GP"] = separator
+        df["Ref2-P2"] = separator
+        df["Ref3-P1"] = separator
+        df["Ref3-GP"] = separator
+        df["Ref3-P2"] = separator
+        df["Player 2"] = separator
+        return df
+
+    save_dict = {}
+
+    orgnaized_games_tables = _organize_games_table(all_games_tables, all_game_table_ids)
+    for category, category_games in orgnaized_games_tables.items():
+        list_of_df = []
+        list_of_keys = []
+        for game_type, game_type_games in category_games.items():
+            # concanate all games for one game type over all rounds tables
+            for round, round_games in game_type_games.items():
+                for chave, chave_games in round_games.items():
+                    for game in chave_games:
+                        list_of_df.append(game)
+                        list_of_keys.append((f"Round: {round}", game_type, chave))
+
+        total_cat_type_df = pd.concat(list_of_df, keys=list_of_keys).sort_index(
+            level=0, sort_remaining=False
+        )
+
+        save_dict[category] = total_cat_type_df
+
+    # create excel file
+    print(filename)
+    filename = "Results_" + filename
+    with pd.ExcelWriter(filename, engine="openpyxl") as writer:
+        for category, df in save_dict.items():
+            df.to_excel(writer, sheet_name=category)
+
+    return None

@@ -18,6 +18,7 @@ def create_basic_layout():
             "width": "80%",
         },
         children=[
+            html.Div(id="div-hidden", style={"display": "none"}),
             dbc.Row([dbc.Col(html.H1("Capoeira Jogos"))]),  # end first row
             dbc.Row(
                 [
@@ -159,8 +160,11 @@ def split_round_in_chaves(name_list, player_per_shaves):
     random.seed(0.2)  # set fixed seed
     random.shuffle(name_list)
     # amount of chaves
-    no_chaves = (len(name_list) // player_per_shaves) + 1
-
+    if len(name_list) % player_per_shaves == 0:
+        no_chaves = len(name_list) // player_per_shaves
+    else:
+        no_chaves = (len(name_list) // player_per_shaves) + 1
+    print(no_chaves)
     # fill up with empty players
     name_list += ["Placeholder"] * (no_chaves * player_per_shaves - len(name_list))
     # split names in chaves
@@ -401,14 +405,17 @@ def create_game_type_acc_item(category, round, shave_names_dict, game_type, pair
         players_2 = [players[1] for players in chave_pairs_for_type]
         chave_df = pd.DataFrame(players_1, columns=["Player 1"])
         chave_df["Ref1-P1"] = 0
-        chave_df["Ref1-GP"] = 0
         chave_df["Ref1-P2"] = 0
+        chave_df["Ref1-GP"] = 0
+
         chave_df["Ref2-P1"] = 0
-        chave_df["Ref2-GP"] = 0
         chave_df["Ref2-P2"] = 0
+        chave_df["Ref2-GP"] = 0
+
         chave_df["Ref3-P1"] = 0
-        chave_df["Ref3-GP"] = 0
         chave_df["Ref3-P2"] = 0
+        chave_df["Ref3-GP"] = 0
+
         chave_df["Player 2"] = players_2
 
         # set table styling:
@@ -418,15 +425,15 @@ def create_game_type_acc_item(category, round, shave_names_dict, game_type, pair
                 "if": {"column_id": "Player 1"},
                 "width": "15%",
                 "textAlign": "left",
-                "backgroundColor": "rgb(23,35,230)",
+                "backgroundColor": "rgb(50,50,50)",
                 "color": "white",
                 "border": "1px solid black",
             },
             {
                 "if": {"column_id": "Player 2"},
                 "width": "15%",
+                "backgroundColor": "rgb(23,35,230)",
                 "textAlign": "left",
-                "backgroundColor": "rgb(50,50,50)",
                 "color": "white",
             },
         ]
@@ -434,7 +441,7 @@ def create_game_type_acc_item(category, round, shave_names_dict, game_type, pair
             {
                 "if": {"column_id": c},
                 "max-width": "10%",
-                "backgroundColor": "rgb(51,67,181)",
+                "backgroundColor": "rgb(90,90,90)",
                 "color": "white",
             }
             for c in ["Ref1-P1", "Ref2-P1", "Ref3-P1"]
@@ -442,15 +449,27 @@ def create_game_type_acc_item(category, round, shave_names_dict, game_type, pair
         inner_table_style_P2 = [
             {
                 "if": {"column_id": c},
+                "backgroundColor": "rgb(51,67,181)",
                 "max-width": "10%",
-                "backgroundColor": "rgb(90,90,90)",
                 "color": "white",
             }
             for c in ["Ref1-P2", "Ref2-P2", "Ref3-P2"]
         ]
+        inner_table_style_GP = [
+            {
+                "if": {"column_id": c},
+                "max-width": "10%",
+                "backgroundColor": "rgb(240,64,41)",
+                "color": "white",
+            }
+            for c in ["Ref1-GP", "Ref2-GP", "Ref3-GP"]
+        ]
 
         style_data_conditional = (
-            outer_table_style + inner_table_style_P1 + inner_table_style_P2
+            outer_table_style
+            + inner_table_style_P1
+            + inner_table_style_P2
+            + inner_table_style_GP
         )
         chave_table = dash_table.DataTable(
             chave_df.to_dict("records"),
