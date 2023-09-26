@@ -247,6 +247,11 @@ def create_round_tabs(
                         id={"type": "show-results-button", "index": category},
                         style={"margin-left": "2%", "width": "30%"},
                     ),
+                    dbc.Button(
+                        "Export group games",
+                        id={"type": "Export-group-games-button", "index": category},
+                        style={"margin-left": "2%", "width": "30%"},
+                    ),
                     dbc.Offcanvas(
                         children=[],
                         title=f"{category} results:",

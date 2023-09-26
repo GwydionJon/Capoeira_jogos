@@ -12,6 +12,7 @@ from app_logic import (
     start_new_round,
     generate_category_results,
     save_everything_to_excl,
+    export_group_games,
 )
 
 
@@ -212,6 +213,39 @@ class Jogos_App:
             State("upload-data", "filename"),
             prevent_initial_call=True,
         )(save_everything_to_excl)
+
+        self.app.callback(
+            Output(
+                {"type": "Export-group-games-button", "index": MATCH},
+                "n_clicks",
+            ),
+            Input(
+                {"type": "Export-group-games-button", "index": MATCH},
+                "n_clicks",
+            ),
+            State(
+                {
+                    "type": "chave-table",
+                    "index": MATCH,
+                    "round": ALL,
+                    "chave": ALL,
+                    "game_type": ALL,
+                },
+                "data",
+            ),
+            State(
+                {
+                    "type": "chave-table",
+                    "index": MATCH,
+                    "round": ALL,
+                    "chave": ALL,
+                    "game_type": ALL,
+                },
+                "id",
+            ),
+            State("upload-data", "filename"),
+            prevent_initial_call=True,
+        )(export_group_games)
 
     def run_server(self):
         self.app.run_server(debug=True, use_reloader=True, port=8084)

@@ -295,20 +295,6 @@ def generate_category_results(
 
 
 def save_everything_to_excl(all_games_tables, all_game_table_ids, filename):
-    def _dataframe_row_sep(separator):
-        df = pd.DataFrame()
-        df["Player 1"] = separator
-        df["Ref1-P1"] = separator
-        df["Ref1-GP"] = separator
-        df["Ref1-P2"] = separator
-        df["Ref2-P1"] = separator
-        df["Ref2-GP"] = separator
-        df["Ref2-P2"] = separator
-        df["Ref3-P1"] = separator
-        df["Ref3-GP"] = separator
-        df["Ref3-P2"] = separator
-        df["Player 2"] = separator
-        return df
 
     save_dict = {}
 
@@ -338,3 +324,27 @@ def save_everything_to_excl(all_games_tables, all_game_table_ids, filename):
             df.to_excel(writer, sheet_name=category)
 
     return None
+
+
+def export_group_games(n_clicks, shave_tables, shave_tables_id, filename):
+    orgnaized_games_tables = _organize_games_table(shave_tables, shave_tables_id)
+    for category, category_games in orgnaized_games_tables.items():
+        list_of_df = []
+        list_of_keys = []
+        for game_type, game_type_games in category_games.items():
+            # concanate all games for one game type over all rounds tables
+            for round, round_games in game_type_games.items():
+                for chave, chave_games in round_games.items():
+                    for game in chave_games:
+                        list_of_df.append(game[["Player 1", "Player 2"]])
+                        list_of_keys.append((f"Round: {round}", game_type, chave))
+
+        total_cat_type_df = pd.concat(list_of_df, keys=list_of_keys).sort_index(
+            level=0, sort_remaining=False
+        )
+
+        filename = f"Games_{category}_{filename}"
+        with pd.ExcelWriter(filename, engine="openpyxl") as writer:
+            total_cat_type_df.to_excel(writer, sheet_name=category)
+
+    return n_clicks
