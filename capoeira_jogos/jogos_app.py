@@ -218,5 +218,5 @@ class Jogos_App:
 
 
 if __name__ == "__main__":
-    app = jogos_app()
+    app = Jogos_App()
     app.run_server()
